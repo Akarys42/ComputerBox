@@ -1,0 +1,9 @@
+source ./constants.sh
+source ./commons.sh
+set -e
+
+echo ${STYLE_BOLD} DOWNLOADING BUSYBOX ${STYLE_RESET}
+download ${BUSYBOX_DOWNLOAD} ${BUSYBOX_FILE}
+
+echo ${STYLE_BOLD} EXTRACTING BUSYBOX ${STYLE_RESET}
+extract ${BUSYBOX_FILE} ${BUSYBOX_BUILD}
