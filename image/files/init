@@ -8,5 +8,5 @@ mount -t sysfs proc /sys
 mount -n -t devtmpfs devtmpfs /dev
 mount -n -t cgroup2 cgroup2 /sys/fs/cgroup
 
-echo "Kernel init done."
-exec /bin/sh
+echo "VM init finished."
+exec /controller
