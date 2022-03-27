@@ -1,0 +1,27 @@
+#!/bin/sh
+# Initialization file ran by the kernel to set up the environment
+
+trap "read -t10 -p 'Init exited. Press any key to continue...' -n1" EXIT
+set -e
+
+mount -t proc proc /proc
+mount -t sysfs proc /sys
+mount -n -t devtmpfs devtmpfs /dev
+mount -n -t cgroup2 cgroup2 /sys/fs/cgroup
+mkdir /dev/pts
+mount -n -t devpts devpts /dev/pts
+
+echo "VM initialization finished."
+
+for i in "$@"; do
+  case $i in
+    binary=*)
+      exec "${i#*=}"
+      shift
+      ;;
+    *)
+      ;;
+  esac
+done
+
+RUST_BACKTRACE=1 exec /controller

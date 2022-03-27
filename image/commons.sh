@@ -17,3 +17,10 @@ function extract() {
         echo ${STYLE_2}$2${STYLE_RESET} already exists
     fi
 }
+
+# Patches the specs file to remove the rename of cpp_options to old_cpp_options
+function patch_specs_rename() {
+    cp ${SYSROOT}/lib/musl-gcc.specs ${SYSROOT}/lib/musl-gcc.specs.old
+    trap "mv -f ${SYSROOT}/lib/musl-gcc.specs.old ${SYSROOT}/lib/musl-gcc.specs || true" EXIT
+    sed -i 's/%rename cpp_options old_cpp_options//' ${SYSROOT}/lib/musl-gcc.specs
+}
