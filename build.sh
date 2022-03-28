@@ -1,5 +1,6 @@
 #!/bin/bash
 set -e
+cd image
 
 source ./constants.sh
 
