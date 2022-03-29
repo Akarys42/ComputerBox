@@ -8,3 +8,5 @@ authors = ["Matteo Bertucci"]
 exec = "0.3.1"
 pty = "0.2.2"
 fuse = "0.3.1"
+libc = "0.2.121"
+time = "0.1.44"

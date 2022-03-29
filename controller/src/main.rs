@@ -1,16 +1,15 @@
-use std::path::Path;
 use exec::execvp;
-use fuse::Filesystem;
 
-struct NullFS;
-
-impl Filesystem for NullFS {}
+mod selftest;
 
 fn main() {
-    println!("Hello, world!");
+    println!("ComputerBox VM");
 
-    let p = Path::new("/test");
-    fuse::mount(NullFS, &p, &[]).unwrap();
+    let test_result = selftest::perform_selftest();
+    match test_result {
+        Ok(_) => println!("selftest: ok"),
+        Err(error) => println!("selftest: {}", error.message),
+    }
 
     println!("Shutting down VM.");
     let err = execvp("/bin/busybox", &["poweroff", "-f"]);
