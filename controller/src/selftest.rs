@@ -2,26 +2,26 @@ use std::process::Command;
 use std::str;
 use std::fs;
 use std::ffi::OsStr;
-use time::Timespec;
+use std::time::{Duration, UNIX_EPOCH};
 use libc::ENOENT;
-use fuse::{BackgroundSession, FileType, FileAttr, Filesystem, Request, ReplyData, ReplyEntry, ReplyAttr, ReplyDirectory};
+use fuser::{BackgroundSession, FileType, FileAttr, Filesystem, Request, ReplyData, ReplyEntry, ReplyAttr, ReplyDirectory};
 
-// fusefs test adapted from https://github.com/zargony/fuse-rs/blob/master/examples/hello.rs under the MIT license: 
-// Copyright (c) 2013 Andreas Neuhaus https://zargony.com/
+// fusefs test adapted from https://github.com/cberner/fuser/blob/master/examples/hello.rs under the MIT license: 
+// Copyright (c) 2020-present Christopher Berner
+// Copyright (c) 2013-2019 Andreas Neuhaus https://zargony.com/
 // Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 // The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software. */
 
-const TTL: Timespec = Timespec { sec: 1, nsec: 0 };
-const EPOCH: Timespec = Timespec { sec: 0, nsec: 0 };
+const TTL: Duration = Duration::from_secs(1);
 
 const TEST_DIR_ATTR: FileAttr = FileAttr {
     ino: 1,
     size: 0,
     blocks: 0,
-    atime: EPOCH,
-    mtime: EPOCH,
-    ctime: EPOCH,
-    crtime: EPOCH,
+    atime: UNIX_EPOCH,
+    mtime: UNIX_EPOCH,
+    ctime: UNIX_EPOCH,
+    crtime: UNIX_EPOCH,
     kind: FileType::Directory,
     perm: 0o755,
     nlink: 2,
@@ -29,6 +29,7 @@ const TEST_DIR_ATTR: FileAttr = FileAttr {
     gid: 20,
     rdev: 0,
     flags: 0,
+    blksize: 512,
 };
 
 const TEST_TXT_CONTENT: &str = "Hello World!\n";
@@ -37,10 +38,10 @@ const TEST_TXT_ATTR: FileAttr = FileAttr {
     ino: 2,
     size: 13,
     blocks: 1,
-    atime: EPOCH,
-    mtime: EPOCH,
-    ctime: EPOCH,
-    crtime: EPOCH,
+    atime: UNIX_EPOCH,
+    mtime: UNIX_EPOCH,
+    ctime: UNIX_EPOCH,
+    crtime: UNIX_EPOCH,
     kind: FileType::RegularFile,
     perm: 0o644,
     nlink: 1,
@@ -48,6 +49,7 @@ const TEST_TXT_ATTR: FileAttr = FileAttr {
     gid: 20,
     rdev: 0,
     flags: 0,
+    blksize: 512,
 };
 
 pub struct SelftestError {
@@ -89,7 +91,7 @@ impl Filesystem for TestFs {
         }
     }
 
-    fn read(&mut self, _req: &Request, ino: u64, _fh: u64, offset: i64, _size: u32, reply: ReplyData) {
+    fn read(&mut self, _req: &Request, ino: u64, _fh: u64, offset: i64, _size: u32, _flags: i32, _lock: Option<u64>, reply: ReplyData) {
         if ino == 2 {
             reply.data(&TEST_TXT_CONTENT.as_bytes()[offset as usize..]);
         } else {
@@ -111,35 +113,43 @@ impl Filesystem for TestFs {
 
         for (i, entry) in entries.into_iter().enumerate().skip(offset as usize) {
             // i + 1 means the index of the next entry
-            reply.add(entry.0, (i + 1) as i64, entry.1, entry.2);
+            let _ = reply.add(entry.0, (i + 1) as i64, entry.1, entry.2);
         }
         reply.ok();
     }
 }
 
+#[cfg(not(feature = "skipselftests"))]
 pub fn perform_selftest() -> Result<(), SelftestError> {
+    let mut failed_tests = vec!();
+
     // Minijail self test
     let minijail_test = Command::new("minijail0")
-        .args(["-c", "0", "-G", "-u", "nobody", "whoami"])
-        .output()?;
+        .args(["-c", "0", "--ambient", "-C", "/bin", "/true"])
+        .status()?;
     
-    if str::from_utf8(&minijail_test.stdout)? != "nobody\n" {
-        return Err(SelftestError {
-            message: "failed: minijail0".to_string(),
-        });
+    if !minijail_test.success() {
+        failed_tests.push("minijail0");
     }
 
     // Fusefs self test
     fs::create_dir("/selftest")?;
     let _test_fs: BackgroundSession;
-    unsafe { _test_fs = fuse::spawn_mount(TestFs {}, &"/selftest", &[])?; }
+    _test_fs = fuser::spawn_mount2(TestFs {}, &"/selftest", &[])?;
     let fusefs_test = fs::read_to_string("/selftest/test.txt")?;
 
     if fusefs_test != TEST_TXT_CONTENT {
+        failed_tests.push("fusefs");
+    }
+
+    if failed_tests.len() > 0 {
         return Err(SelftestError {
-            message: "failed: fusefs".to_string(),
+            message: format!("failed: {}", failed_tests.join(", ")),
         });
     }
     
     Ok(())
 }
+
+#[cfg(feature = "skipselftests")]
+pub fn perform_selftest() -> Result<(), SelftestError> { Ok(()) }
