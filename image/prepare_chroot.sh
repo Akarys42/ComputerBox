@@ -13,7 +13,7 @@ function in_chroot() {
 function mount_project() {
     echo ${STYLE_BOLD} MOUNTING PROJECT ROOT ${STYLE_RESET}
 
-    mkdir -p ${BIND}
+    ${SUDO} mkdir -p ${BIND}
     ${SUDO} mount --bind ${ROOT} ${BIND}
 
     echo ${STYLE_BOLD} MOUNTING SYSTEM DIRECTORIES ${STYLE_RESET}
@@ -40,19 +40,19 @@ if [ $1 == "mount" ]; then
 
         echo ${STYLE_BOLD} CREATING CHROOT ${STYLE_RESET}
         ${SUDO} ${CHROOT}/apk_tools/sbin/apk.static -X ${ALPINE_MIRROR}/latest-stable/main -U --allow-untrusted -p ${CHROOT} --initdb add alpine-base
-        ${SUDO} chroot ${CHROOT} adduser ${USER} -u $(id -u) -g $(id -g) --disabled-password
 
         ${SUDO} cp -L /etc/resolv.conf ${CHROOT}/etc/
         ${SUDO} mkdir -p ${CHROOT}/etc/apk
         echo "${ALPINE_MIRROR}/latest-stable/main" | ${SUDO} tee -a ${CHROOT}/etc/apk/repositories > /dev/null
-        echo "${ALPINE_MIRROR}/latest-stable/community" | ${SUDO} tee -a ${CHROOT}/etc/apk/repositories > /dev/null  # Required for cargo
+        echo "${ALPINE_MIRROR}/latest-stable/community" | ${SUDO} tee -a ${CHROOT}/etc/apk/repositories > /dev/null  # Required for rustup
 
         mount_project
 
         echo ${STYLE_BOLD} INSTALLING REQUIRED TOOLS ${STYLE_RESET}
 
         in_chroot apk add --no-cache ${ALPINE_PACKAGES}
-        in_chroot rustup-init -y --default-toolchain none
+        in_chroot adduser build-agent -u $(id -u) -g $(id -g) --disabled-password || true
+        in_chroot RUSTUP_HOME=/usr/local/rustup CARGO_HOME=/usr/local/cargo rustup-init -y --default-toolchain none
     else
         echo ${STYLE_2}${CHROOT}${STYLE_RESET} already exists
         mount_project
@@ -61,10 +61,10 @@ elif [ $1 == "umount" ]; then
     if [ -d $CHROOT ]; then
         echo ${STYLE_BOLD} UNMOUNTING CHROOT ${STYLE_RESET}
 
-        ${SUDO} umount ${BIND} || true
         ${SUDO} umount ${CHROOT}/dev || true
         ${SUDO} umount ${CHROOT}/proc || true
         ${SUDO} umount ${CHROOT}/sys || true
+        ${SUDO} umount ${BIND} || true
     else
         echo ${STYLE_2}${CHROOT}${STYLE_RESET} does not exist
     fi

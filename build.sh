@@ -19,5 +19,5 @@ else
   trap "./prepare_chroot.sh umount" EXIT
   ./prepare_chroot.sh mount
 
-  ${SUDO} chroot ${CHROOT} /bin/sh -c "su - ${USER} -c 'cd ${ROOT} && ./build.sh --continue $1'"
+  ${SUDO} chroot ${CHROOT} /bin/sh -c "su - build-agent -c 'cd ${ROOT} && ./build.sh --continue $1'"
 fi

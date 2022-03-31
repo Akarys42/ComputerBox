@@ -10,12 +10,12 @@ FUSE_VERSION=2.9.9
 SUDO=${SUDO:-sudo}
 ALPINE_MIRROR=${ALPINE_MIRROR:-http://dl-cdn.alpinelinux.org/alpine}
 
-ALPINE_PACKAGES="bash ncurses build-base xz flex bison python3 linux-headers diffutils elfutils-dev openssl-dev findutils perl rsync musl-dev rustup"
+ALPINE_PACKAGES="bash bison build-base diffutils elfutils-dev findutils flex linux-headers musl-dev ncurses openssl-dev perl python3 rsync rustup xz"
 
 ROOT=$(readlink -f ..)
 IMAGE=${ROOT}/image
 
-CHROOT=${IMAGE}/chroot
+CHROOT=/tmp/computerbox-build-chroot
 
 SYSROOT=${IMAGE}/sysroot
 UPDATE_CONFIG=${IMAGE}/update_config.py
