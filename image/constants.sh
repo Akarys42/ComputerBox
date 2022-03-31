@@ -10,7 +10,7 @@ FUSE_VERSION=2.9.9
 SUDO=${SUDO:-sudo}
 ALPINE_MIRROR=${ALPINE_MIRROR:-http://dl-cdn.alpinelinux.org/alpine}
 
-ALPINE_PACKAGES="bash bison build-base diffutils elfutils-dev findutils flex linux-headers musl-dev ncurses openssl-dev perl python3 rsync rustup xz"
+ALPINE_PACKAGES="bash bison build-base diffutils elfutils-dev findutils flex linux-headers musl-dev ncurses openssl-dev perl python3 rsync rustup sudo xz"
 
 ROOT=$(readlink -f ..)
 IMAGE=${ROOT}/image
