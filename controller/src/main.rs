@@ -5,8 +5,7 @@ mod selftest;
 fn main() {
     println!("ComputerBox VM");
 
-    let test_result = selftest::perform_selftest();
-    match test_result {
+    match selftest::perform_selftest() {
         Ok(_) => println!("selftest: ok"),
         Err(error) => println!("selftest: {}", error.message),
     }

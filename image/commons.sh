@@ -12,7 +12,7 @@ function download() {
 # Arguments: $1 = file, $2 = extract directory
 function extract() {
     if [ ! -d $2 ]; then
-        tar -xvf $1 -C ${BUILD} > /dev/null
+        tar -xf $1 -C $(dirname $2)
     else
         echo ${STYLE_2}$2${STYLE_RESET} already exists
     fi

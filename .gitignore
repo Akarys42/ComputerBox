@@ -1,4 +1,5 @@
 # Image build
+image/chroot
 image/build
 image/downloads
 image/sysroot
