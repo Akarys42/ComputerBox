@@ -1,0 +1,61 @@
+# Workflow that will be used to build and test the project
+name: Build & Test
+
+on:
+  push:
+  pull_request:
+
+concurrency: build-test-${{ github.ref }}
+
+env:
+  TERM: xterm-256color
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Build the project
+        run: ./build.sh
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: image
+          path: |
+            ./vmlinuz
+            ./initramfs.cpio.gz
+    
+  test:
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install qemu
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y qemu-system
+      
+      - name: Download artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: image
+          path: .
+      
+      - name: Run tests
+        uses: mathiasvr/command-output@v1.1.0
+        env:
+          SELFTEST_ONLY: true
+        with:
+          run: ./run.sh
+        id: selftests
+      
+      - name: Check test output
+        run: |
+          echo "${{ steps.selftests.outputs.stdout }}" | grep "selftest: ok"
