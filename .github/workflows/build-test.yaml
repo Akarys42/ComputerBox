@@ -53,7 +53,7 @@ jobs:
         env:
           SELFTEST_ONLY: true
         with:
-          run: ./run.sh
+          run: ./run.sh selftests_only=true
         id: selftests
       
       - name: Check test output

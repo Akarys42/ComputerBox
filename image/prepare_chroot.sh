@@ -24,9 +24,8 @@ function mount_project() {
 }
 
 if [ $1 == "mount" ]; then
+    echo ${STYLE_BOLD} PREPARING CHROOT ${STYLE_RESET}
     if [ ! -d $CHROOT ]; then
-        echo ${STYLE_BOLD} PREPARING CHROOT ${STYLE_RESET}
-
         mkdir -p -v ${CHROOT}
         mkdir -p ${SYSROOT}
         mkdir -p ${DOWNLOADS}
@@ -51,8 +50,10 @@ if [ $1 == "mount" ]; then
         echo ${STYLE_BOLD} INSTALLING REQUIRED TOOLS ${STYLE_RESET}
 
         in_chroot apk add --no-cache ${ALPINE_PACKAGES}
-        in_chroot adduser build-agent -u $(id -u) -g $(id -g) --disabled-password || true
+        in_chroot adduser build-agent -u $(id -u) -g $(id -g) -G root --disabled-password || true
         in_chroot RUSTUP_HOME=/usr/local/rustup CARGO_HOME=/usr/local/cargo rustup-init -y --default-toolchain none
+        in_chroot mkdir -p /tmp
+        in_chroot chown $(id -u):$(id -g) /tmp
     else
         echo ${STYLE_2}${CHROOT}${STYLE_RESET} already exists
         mount_project

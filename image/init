@@ -24,4 +24,4 @@ for i in "$@"; do
   esac
 done
 
-RUST_BACKTRACE=1 /controller
+RUST_BACKTRACE=1 /controller $@
