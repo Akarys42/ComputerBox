@@ -3,6 +3,7 @@ use std::env;
 use exec::execvp;
 use log::{LevelFilter, info, warn, error};
 
+mod filesystem;
 mod selftest;
 mod logging;
 
@@ -27,7 +28,7 @@ fn main() {
         Err(error) => warn!("selftest: {}", error.message),
     }
 
-    if parameters.get("selftests_only") == Some(&"true") {
+    if parameters.get("selftest_only") == Some(&"true") {
         shutdown();
     }
 

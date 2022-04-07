@@ -5,6 +5,8 @@ use std::ffi::OsStr;
 use std::time::{Duration, UNIX_EPOCH};
 use libc::ENOENT;
 use fuser::{BackgroundSession, FileType, FileAttr, Filesystem, Request, ReplyData, ReplyEntry, ReplyAttr, ReplyDirectory};
+#[cfg(feature = "skipselftests")]
+use log::warn;
 
 // fusefs test adapted from https://github.com/cberner/fuser/blob/master/examples/hello.rs under the MIT license: 
 // Copyright (c) 2020-present Christopher Berner
@@ -152,4 +154,7 @@ pub fn perform_selftest() -> Result<(), SelftestError> {
 }
 
 #[cfg(feature = "skipselftests")]
-pub fn perform_selftest() -> Result<(), SelftestError> { Ok(()) }
+pub fn perform_selftest() -> Result<(), SelftestError> {
+    warn!("Skipping selftest");
+    Ok(())
+}
