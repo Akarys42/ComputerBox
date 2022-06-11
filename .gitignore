@@ -6,6 +6,9 @@ image/sysroot
 initramfs.cpio.gz
 vmlinuz
 
+# Data
+store.qcow2
+
 # IDEs
 .idea
 .vscode

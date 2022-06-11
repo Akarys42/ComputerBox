@@ -1,5 +1,5 @@
 APK_TOOLS_VERSION=2.12.7-r3
-KERNEL_VERSION=5.15.31
+KERNEL_VERSION=5.18.1
 MUSL_VERSION=1.2.2
 BUSYBOX_VERSION=1.35.0
 LIBCAP_VERSION=2.63
@@ -11,7 +11,7 @@ SUDO=${SUDO:-sudo}
 ALPINE_MIRROR=${ALPINE_MIRROR:-http://dl-cdn.alpinelinux.org/alpine}
 CHROOT=${CHROOT:-/tmp/computerbox-build-chroot}
 
-ALPINE_PACKAGES="bash bison build-base diffutils elfutils-dev findutils flex linux-headers musl-dev ncurses openssl-dev perl python3 rsync rustup sudo xz"
+ALPINE_PACKAGES="bash bison build-base clang diffutils elfutils-dev findutils flex linux-headers lld llvm musl-dev ncurses openssl-dev perl python3 rsync rustup sudo xz"
 
 ROOT=$(readlink -f ..)
 IMAGE=${ROOT}/image
