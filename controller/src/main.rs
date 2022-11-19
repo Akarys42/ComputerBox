@@ -6,6 +6,7 @@ use log::{LevelFilter, info, warn, error};
 mod filesystem;
 mod selftest;
 mod logging;
+mod app;
 
 fn shutdown() -> ! {
     let err = execvp("/bin/busybox", &["poweroff", "-f"]);
@@ -13,7 +14,8 @@ fn shutdown() -> ! {
     panic!("Shutdown failed");
 }
 
-fn main() {
+#[tokio::main]
+async fn main() {
     println!("ComputerBox VM");
     logging::init_logging(LevelFilter::Info).expect("Failed to set up logging");
 
@@ -32,6 +34,11 @@ fn main() {
         shutdown();
     }
 
-    error!("Not implemented");
+    let app = app::App::new();
+    let handle = app.run_server(9456);
+
+    handle.await.expect("Server panicked");
+
+    error!("Handle returned");
     shutdown();
 }

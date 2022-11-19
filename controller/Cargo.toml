@@ -2,7 +2,7 @@
 name = "controller"
 version = "0.1.0"
 edition = "2021"
-authors = ["Matteo Bertucci"]
+authors = ["Amber Bertucci"]
 
 [features]
 skipselftests = []
@@ -14,10 +14,11 @@ fuser = "0.11.0"
 libc = "0.2.121"
 simplelog = "0.11.2"
 log = "0.4.16"
-tokio = { version = "1.17.0", features = ["sync", "rt", "net"] }
+tokio = { version = "1.17.0", features = ["sync", "rt", "rt-multi-thread", "net", "macros"] }
 tokio-tungstenite = "0.17.1"
 futures-util = "0.3.21"
 dashmap = "5.2.0"
 serde_json = "1.0.79"
 serde_derive = "1.0.136"
 serde = "1.0.136"
+warp = "0.3.3"

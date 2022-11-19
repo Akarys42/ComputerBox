@@ -11,6 +11,11 @@ mount -n -t cgroup2 cgroup2 /sys/fs/cgroup
 mkdir /dev/pts
 mount -n -t devpts devpts /dev/pts
 
+ifconfig lo up
+ifconfig eth0 10.0.2.15 up
+ip route add 10.0.2.0/24 dev eth0
+route add default gw 10.0.2.2 eth0
+
 echo "VM initialization finished."
 
 for i in "$@"; do
